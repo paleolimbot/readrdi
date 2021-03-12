@@ -8,35 +8,6 @@
 #include "read-rdi-common.h"
 #include "read-rdi-sexp.h"
 
-// get a human-readable label from the rdi_item_type enum
-const char* rdi_item_type_label(uint16_t magic_number) {
-    switch(magic_number) {
-    case RDI_TYPE_FIXED_LEADER: return "fixed_leader";
-    case RDI_TYPE_VARIABLE_LEADER: return "variable_leader";
-    case RDI_TYPE_VELOCITY: return "velocity";
-    case RDI_TYPE_CORRELATION: return "correlation";
-    case RDI_TYPE_ECHO_INTENSITY: return "echo_intensity";
-    case RDI_TYPE_PCT_GOOD: return "pct_good";
-    case RDI_TYPE_BOTTOM_TRACK: return "bottom_track";
-    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_VELOCITY: return "sentinel_vertical_beam_velocity";
-    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_CORRECTION: return "sentinel_vertical_beam_correction";
-    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_AMPLITUDE: return "sentinel_vertical_beam_amplitude";
-    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_PCT_GOOD: return "sentinel_vertical_beam_pct_good";
-    case RDI_TYPE_VMDASS: return "vmdass";
-    case RDI_TYPE_BINARY_FIXED_ATTITUDE: return "binary_fixed_attitude";
-    case RDI_TYPE_SENTINEL_TRANSFORMATION_MATRIX: return "sentinel_transformation_matrix";
-    default: return "unknown";
-    }
-}
-
-// A wrapper around the file handle and any options passed in
-// from R. This is needed for R_ExecWithCleanup() but is also a
-// nice abstraction around the file types
-typedef struct {
-    FILE* handle;
-    int offset;
-} read_rdi_data_t;
-
 void rdi_seek_absolute(read_rdi_data_t* data, size_t offset) {
     if (fseek(data->handle, offset, SEEK_SET) != 0) {
         Rf_error("Seek to file offset %d failed", offset);
@@ -263,13 +234,13 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
     return container;
 }
 
-SEXP readrdi_c_read_rdi_meta_impl(void* data_void) {
+SEXP readrdi_read_rdi_impl(void* data_void) {
     read_rdi_data_t* data = (read_rdi_data_t*) data_void;
     rdi_seek_absolute(data, data->offset);
     return rdi_read_ensemble_sexp(data);
 }
 
-void readrdi_c_read_rdi_cleanup(void* data_void) {
+void readrdi_read_rdi_cleanup(void* data_void) {
     read_rdi_data_t* data = (read_rdi_data_t*) data_void;
     if (data->handle != NULL) {
         fclose(data->handle);
@@ -278,10 +249,9 @@ void readrdi_c_read_rdi_cleanup(void* data_void) {
     free(data);
 }
 
-SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset, SEXP op) {
+SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset) {
     const char* filename_chr = Rf_translateChar(STRING_ELT(filename, 0));
     int offset_int = INTEGER(offset)[0];
-    int op_int = INTEGER(op)[0];
 
     FILE* handle = fopen(filename_chr, "rb");
     if (handle == NULL) {
@@ -296,12 +266,5 @@ SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset, SEXP op) {
     data->handle = handle;
     data->offset = offset_int;
 
-    switch (op_int) {
-    case 0:
-        return R_ExecWithCleanup(&readrdi_c_read_rdi_meta_impl, data, &readrdi_c_read_rdi_cleanup, data);
-    case 1:
-        return R_ExecWithCleanup(&readrdi_c_read_rdi_meta_impl, data, &readrdi_c_read_rdi_cleanup, data);
-    default:
-        Rf_error("Unknown operation: %d", op_int);
-    }
+    return R_ExecWithCleanup(&readrdi_read_rdi_impl, data, &readrdi_read_rdi_cleanup, data);
 }

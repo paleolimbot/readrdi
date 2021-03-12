@@ -35,8 +35,7 @@ guess_rdi_types <- function(file) {
 #' @export
 rdi_index <- function(file, offset = 0L) {
   file <- path.expand(file)
-  # op == 1 -> read_rdi
-  rdi <- .Call(readrdi_c_read_rdi, file, as.integer(offset)[1], 1L)
+  rdi <- .Call("readrdi_c_rdi_index", file, as.integer(offset)[1])
 }
 
 # Currently the C code just reads one ensemble at a time and reads
@@ -48,8 +47,7 @@ rdi_index <- function(file, offset = 0L) {
 # https://github.com/dankelley/oce/blob/develop/src/ldc_rdi_in_file.cpp
 read_rdi_internal <- function(file, offset = 0L) {
   file <- path.expand(file)
-  # op == 0 -> read_rdi
-  rdi <- .Call(readrdi_c_read_rdi, file, as.integer(offset)[1], 0L)
+  rdi <- .Call("readrdi_c_read_rdi", file, as.integer(offset)[1])
 
   # Should really be done in C if this starts to limit speed
   is_fixed_leader <- names(rdi) == "fixed_leader"

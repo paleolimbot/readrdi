@@ -147,4 +147,34 @@ typedef struct {
     uint8_t range_msb[4]; // 77
 } rdi_bottom_track_t;
 
+
+// get a human-readable label from the rdi_item_type enum
+static inline const char* rdi_item_type_label(uint16_t magic_number) {
+    switch(magic_number) {
+    case RDI_TYPE_FIXED_LEADER: return "fixed_leader";
+    case RDI_TYPE_VARIABLE_LEADER: return "variable_leader";
+    case RDI_TYPE_VELOCITY: return "velocity";
+    case RDI_TYPE_CORRELATION: return "correlation";
+    case RDI_TYPE_ECHO_INTENSITY: return "echo_intensity";
+    case RDI_TYPE_PCT_GOOD: return "pct_good";
+    case RDI_TYPE_BOTTOM_TRACK: return "bottom_track";
+    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_VELOCITY: return "sentinel_vertical_beam_velocity";
+    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_CORRECTION: return "sentinel_vertical_beam_correction";
+    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_AMPLITUDE: return "sentinel_vertical_beam_amplitude";
+    case RDI_TYPE_SENTINEL_VERTICAL_BEAM_PCT_GOOD: return "sentinel_vertical_beam_pct_good";
+    case RDI_TYPE_VMDASS: return "vmdass";
+    case RDI_TYPE_BINARY_FIXED_ATTITUDE: return "binary_fixed_attitude";
+    case RDI_TYPE_SENTINEL_TRANSFORMATION_MATRIX: return "sentinel_transformation_matrix";
+    default: return "unknown";
+    }
+}
+
+// A wrapper around the file handle and any options passed in
+// from R. This is needed for R_ExecWithCleanup() but is also a
+// nice abstraction around the file types
+typedef struct {
+    FILE* handle;
+    int offset;
+} read_rdi_data_t;
+
 #endif
