@@ -31,6 +31,14 @@ guess_rdi_types <- function(file) {
   setdiff(names(read_rdi_internal(file)), "header")
 }
 
+#' @rdname read_rdi
+#' @export
+rdi_index <- function(file, offset = 0L) {
+  file <- path.expand(file)
+  # op == 1 -> read_rdi
+  rdi <- .Call(readrdi_c_read_rdi, file, as.integer(offset)[1], 1L)
+}
+
 # Currently the C code just reads one ensemble at a time and reads
 # everything. All the BSRTO files are a single ensemble when uploaded
 # so it works well here. This was written using the
@@ -40,7 +48,8 @@ guess_rdi_types <- function(file) {
 # https://github.com/dankelley/oce/blob/develop/src/ldc_rdi_in_file.cpp
 read_rdi_internal <- function(file, offset = 0L) {
   file <- path.expand(file)
-  rdi <- .Call(readrdi_c_read_rdi, file, as.integer(offset)[1])
+  # op == 0 -> read_rdi
+  rdi <- .Call(readrdi_c_read_rdi, file, as.integer(offset)[1], 0L)
 
   # Should really be done in C if this starts to limit speed
   is_fixed_leader <- names(rdi) == "fixed_leader"

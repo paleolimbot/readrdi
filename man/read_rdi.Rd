@@ -3,11 +3,14 @@
 \name{read_rdi}
 \alias{read_rdi}
 \alias{guess_rdi_types}
+\alias{rdi_index}
 \title{Read RDI files}
 \usage{
 read_rdi(file, types = guess_rdi_types(file))
 
 guess_rdi_types(file)
+
+rdi_index(file, offset = 0L)
 }
 \arguments{
 \item{file}{A filename from which to read}

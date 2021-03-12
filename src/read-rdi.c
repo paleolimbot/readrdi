@@ -278,9 +278,10 @@ void readrdi_c_read_rdi_cleanup(void* data_void) {
     free(data);
 }
 
-SEXP readrdi_c_read_rdi_meta(SEXP filename, SEXP offset) {
+SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset, SEXP op) {
     const char* filename_chr = Rf_translateChar(STRING_ELT(filename, 0));
     int offset_int = INTEGER(offset)[0];
+    int op_int = INTEGER(op)[0];
 
     FILE* handle = fopen(filename_chr, "rb");
     if (handle == NULL) {
@@ -294,5 +295,13 @@ SEXP readrdi_c_read_rdi_meta(SEXP filename, SEXP offset) {
 
     data->handle = handle;
     data->offset = offset_int;
-    return R_ExecWithCleanup(&readrdi_c_read_rdi_meta_impl, data, &readrdi_c_read_rdi_cleanup, data);
+
+    switch (op_int) {
+    case 0:
+        return R_ExecWithCleanup(&readrdi_c_read_rdi_meta_impl, data, &readrdi_c_read_rdi_cleanup, data);
+    case 1:
+        return R_ExecWithCleanup(&readrdi_c_read_rdi_meta_impl, data, &readrdi_c_read_rdi_cleanup, data);
+    default:
+        Rf_error("Unknown operation: %d", op_int);
+    }
 }
