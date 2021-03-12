@@ -47,8 +47,8 @@ void rdi_read_uint8_n(uint8_t* buf, size_t n, read_rdi_data_t* data) {
     size_t size_read = fread(buf, sizeof(uint8_t), n, data->handle);
     if (size_read != n) {
         Rf_error(
-            "Read %d 8-bit unsigned integers at offset %d but expected %d", 
-            size_read, 
+            "Read %d 8-bit unsigned integers at offset %d but expected %d",
+            size_read,
             ftell(data->handle),
             n
         );
@@ -59,8 +59,8 @@ void rdi_read_uint16_n(uint16_t* buf, size_t n, read_rdi_data_t* data) {
     size_t size_read = fread(buf, sizeof(uint16_t), n, data->handle);
     if (size_read != n) {
         Rf_error(
-            "Read %d 16-bit unsigned integers at offset %d but expected %d", 
-            size_read, 
+            "Read %d 16-bit unsigned integers at offset %d but expected %d",
+            size_read,
             ftell(data->handle),
             n
         );
@@ -71,8 +71,8 @@ void rdi_read_int16_n(int16_t* buf, size_t n, read_rdi_data_t* data) {
     size_t size_read = fread(buf, sizeof(int16_t), n, data->handle);
     if (size_read != n) {
         Rf_error(
-            "Read %d 16-bit integers at offset %d but expected %d", 
-            size_read, 
+            "Read %d 16-bit integers at offset %d but expected %d",
+            size_read,
             ftell(data->handle),
             n
         );
@@ -84,8 +84,8 @@ uint16_t rdi_read_uint16(read_rdi_data_t* data) {
     size_t size_read = fread(&result, sizeof(uint16_t), 1, data->handle);
     if (size_read != 1) {
         Rf_error(
-            "Read %d 16-bit integers at offset %d but expected %d", 
-            size_read, 
+            "Read %d 16-bit integers at offset %d but expected %d",
+            size_read,
             ftell(data->handle),
             1
         );
@@ -160,7 +160,7 @@ SEXP rdi_read_uint8_array_sexp(read_rdi_data_t* data, const char* name,
                                uint8_t n_beams, uint8_t n_cells) {
     // need to advance the cursor past the magic_number
     uint16_t magic_number = rdi_read_uint16(data);
-    
+
     SEXP values = PROTECT(Rf_allocMatrix(RAWSXP, n_beams, n_cells));
     rdi_read_uint8_n(RAW(values), n_beams * n_cells, data);
 
@@ -258,7 +258,7 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
         SET_VECTOR_ELT(container, i + 1, item);
         UNPROTECT(1);
     }
-    
+
     UNPROTECT(1);
     return container;
 }
@@ -279,7 +279,7 @@ void readrdi_c_read_rdi_cleanup(void* data_void) {
 }
 
 SEXP readrdi_c_read_rdi_meta(SEXP filename, SEXP offset) {
-    const char* filename_chr = CHAR(STRING_ELT(filename, 0));
+    const char* filename_chr = Rf_translateChar(STRING_ELT(filename, 0));
     int offset_int = INTEGER(offset)[0];
 
     FILE* handle = fopen(filename_chr, "rb");

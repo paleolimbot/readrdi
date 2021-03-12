@@ -10,6 +10,20 @@ test_that("read_rdi() works", {
   )
 })
 
+test_that("read_rdi() works for filenames with non ASCII characters", {
+  file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  temp_dir <- tempfile()
+  dir.create(temp_dir)
+  file.copy(file, file.path(temp_dir, "soméoddname.rdi"))
+
+  expect_identical(
+    read_rdi(file.path(temp_dir, "soméoddname.rdi")),
+    read_rdi(file)
+  )
+
+  unlink(temp_dir)
+})
+
 test_that("read_rdi_internal() aligns with results from oce::read.adp.rdi()", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
   # debug(oce:::decodeHeaderRDI)

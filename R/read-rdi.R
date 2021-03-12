@@ -14,16 +14,7 @@
 #' rdi <- read_rdi(rdi_file)
 #'
 read_rdi <- function(file, types = guess_rdi_types(file)) {
-  rdi <- try(read_rdi_internal(file), silent = TRUE)
-  if (inherits(rdi, "try-error")) {
-    warning(
-      sprintf("Error parsing file '%s': %s", file, as.character(rdi)),
-      call. = FALSE,
-      immediate. = TRUE
-    )
-
-    return(list())
-  }
+  rdi <- read_rdi_internal(file)
 
   if (!is.null(types)) {
     rdi <- rdi[intersect(types, names(rdi))]
