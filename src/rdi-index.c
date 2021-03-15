@@ -50,22 +50,18 @@ SEXP readrdi_read_rdi_index_impl(void* data_void) {
         Rf_error("Can't seek to start offset %d", data->offset);
     }
 
-    R_xlen_t alloc_len;
-    if (data->n_max >= 0) {
-        alloc_len = data->n_max;
-    } else {
-        alloc_len = 128;
-    }
-
     // Using the R_PreserveObject() mechanism because we may have to
     // reallocate this list if we run out of space. Could also use
     // multiple vectors here but having a list() of double() makes for
     // less realloc code and probably fewer bugs.
+    R_xlen_t alloc_len = 128;
     data->result = PROTECT(Rf_allocVector(VECSXP, alloc_len));
     R_PreserveObject(data->result);
     UNPROTECT(1);
 
     R_xlen_t n = 0;
+    long item_offset;
+    uint16_t checksum;
     SEXP new_result;
     SEXP item;
     while (rdi_search_for_header_start(data)) {
@@ -86,17 +82,25 @@ SEXP readrdi_read_rdi_index_impl(void* data_void) {
             UNPROTECT(1);
         }
 
-        item = PROTECT(Rf_allocVector(REALSXP, 2));
-        REAL(item)[0] = ftell(data->handle) - sizeof(rdi_header_t);
-        REAL(item)[1] = header.bytes_per_ensemble;
-        SET_VECTOR_ELT(data->result, n, item);
-        UNPROTECT(1);
+        item_offset = ftell(data->handle) - sizeof(rdi_header_t);
 
-        // skip forward by number of bytes to avoid spurious 0x7f7f
-        // that appear in the data
+        // before adding the item, try seeking to the end of the ensemble
+        // and reading the checksum (if it doesn't exist, unlikely that it is
+        // valid)
         if (fseek(data->handle, header.bytes_per_ensemble - sizeof(rdi_header_t), SEEK_CUR) != 0) {
             break;
         }
+
+        if (fread(&checksum, sizeof(uint16_t), 1, data->handle) != 1) {
+            break;
+        }
+
+        item = PROTECT(Rf_allocVector(REALSXP, 3));
+        REAL(item)[0] = item_offset;
+        REAL(item)[1] = header.bytes_per_ensemble;
+        REAL(item)[2] = checksum;
+        SET_VECTOR_ELT(data->result, n, item);
+        UNPROTECT(1);
 
         if ((data->n_max >= 0) && (n >= data->n_max)) {
             break;

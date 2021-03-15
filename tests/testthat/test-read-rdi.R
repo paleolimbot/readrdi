@@ -1,4 +1,17 @@
 
+test_that("rdi_index() works on single-ensemble files", {
+  single_file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  expect_identical(
+    rdi_index(single_file, offset = 0),
+    data.frame(offset = 0, size = 739, checksum = 10383)
+  )
+
+  expect_identical(
+    rdi_index(single_file, offset = 1),
+    data.frame(offset = double(), size = double(), checksum = double())
+  )
+})
+
 test_that("rdi_index() works on multiple ensembles in one file", {
   # need to combine a few versions of the file to get a more realistic thing
   # to index
@@ -6,6 +19,14 @@ test_that("rdi_index() works on multiple ensembles in one file", {
   file_in <- file(single_file, "rb")
   single_file_bin <- readBin(file_in, "raw", file.size(single_file))
   close(file_in)
+
+  checksum <- as.integer(
+    paste0(
+      "0x",
+      single_file_bin[length(single_file_bin)],
+      single_file_bin[length(single_file_bin) - 1]
+    )
+  )
 
   tmp_multi <- tempfile()
   file_out <- file(tmp_multi, open = "wb")
@@ -23,6 +44,7 @@ test_that("rdi_index() works on multiple ensembles in one file", {
   index <- rdi_index(tmp_multi)
 
   expect_true(all(index$size == 739))
+  expect_true(all(index$checksum == checksum))
   expect_identical(nrow(index), 3L)
   expect_identical(index$offset[1], 0)
   expect_identical(index$offset[2], 739 + 2)

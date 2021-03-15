@@ -49,7 +49,8 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
   new_data_frame(
     list(
       offset = vapply(index_transposed, "[", 1L, FUN.VALUE = double(1)),
-      size = vapply(index_transposed, "[", 2L, FUN.VALUE = double(1))
+      size = vapply(index_transposed, "[", 2L, FUN.VALUE = double(1)),
+      checksum = vapply(index_transposed, "[", 3L, FUN.VALUE = double(1))
     )
   )
 }
