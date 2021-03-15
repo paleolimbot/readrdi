@@ -56,6 +56,17 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
   )
 }
 
+#' @rdname read_rdi
+#' @export
+rdi_detect_data_types <- function(file, index = rdi_index(file, n_max = 100)) {
+  .Call(
+    "readrdi_c_read_rdi",
+    file,
+    as.numeric(index$offset),
+    c("header" = as.integer(0x7f7f))
+  )
+}
+
 # Currently the C code just reads one ensemble at a time and reads
 # everything. All the BSRTO files are a single ensemble when uploaded
 # so it works well here. This was written using the

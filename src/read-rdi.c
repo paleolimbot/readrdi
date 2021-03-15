@@ -9,63 +9,63 @@
 #include "read-rdi-sexp.h"
 
 // A wrapper around the file handle and any options passed in
-// from R. This is needed for R_ExecWithCleanup() but is also a
-// nice abstraction around the file types
+// from R. This is needed for R_ExecWithCleanup().
 typedef struct {
     FILE* handle;
-    int offset;
+    SEXP offset;
+    SEXP types;
 } read_rdi_data_t;
 
-void rdi_seek_absolute(read_rdi_data_t* data, size_t offset) {
-    if (fseek(data->handle, offset, SEEK_SET) != 0) {
+void rdi_seek_absolute(FILE* handle, size_t offset) {
+    if (fseek(handle, offset, SEEK_SET) != 0) {
         Rf_error("Seek to file offset %d failed", offset);
     }
 }
 
-void rdi_read_uint8_n(uint8_t* buf, size_t n, read_rdi_data_t* data) {
-    size_t size_read = fread(buf, sizeof(uint8_t), n, data->handle);
+void rdi_read_uint8_n(uint8_t* buf, size_t n, FILE* handle) {
+    size_t size_read = fread(buf, sizeof(uint8_t), n, handle);
     if (size_read != n) {
         Rf_error(
             "Read %d 8-bit unsigned integers at offset %d but expected %d",
             size_read,
-            ftell(data->handle),
+            ftell(handle),
             n
         );
     }
 }
 
-void rdi_read_uint16_n(uint16_t* buf, size_t n, read_rdi_data_t* data) {
-    size_t size_read = fread(buf, sizeof(uint16_t), n, data->handle);
+void rdi_read_uint16_n(uint16_t* buf, size_t n, FILE* handle) {
+    size_t size_read = fread(buf, sizeof(uint16_t), n, handle);
     if (size_read != n) {
         Rf_error(
             "Read %d 16-bit unsigned integers at offset %d but expected %d",
             size_read,
-            ftell(data->handle),
+            ftell(handle),
             n
         );
     }
 }
 
-void rdi_read_int16_n(int16_t* buf, size_t n, read_rdi_data_t* data) {
-    size_t size_read = fread(buf, sizeof(int16_t), n, data->handle);
+void rdi_read_int16_n(int16_t* buf, size_t n, FILE* handle) {
+    size_t size_read = fread(buf, sizeof(int16_t), n, handle);
     if (size_read != n) {
         Rf_error(
             "Read %d 16-bit integers at offset %d but expected %d",
             size_read,
-            ftell(data->handle),
+            ftell(handle),
             n
         );
     }
 }
 
-uint16_t rdi_read_uint16(read_rdi_data_t* data) {
+uint16_t rdi_read_uint16(FILE* handle) {
     uint16_t result;
-    size_t size_read = fread(&result, sizeof(uint16_t), 1, data->handle);
+    size_t size_read = fread(&result, sizeof(uint16_t), 1, handle);
     if (size_read != 1) {
         Rf_error(
             "Read %d 16-bit integers at offset %d but expected %d",
             size_read,
-            ftell(data->handle),
+            ftell(handle),
             1
         );
     }
@@ -73,31 +73,31 @@ uint16_t rdi_read_uint16(read_rdi_data_t* data) {
     return result;
 }
 
-void rdi_read_header(rdi_header_t* header, read_rdi_data_t* data) {
-    size_t size_read = fread(header, sizeof(rdi_header_t), 1, data->handle);
+void rdi_read_header(rdi_header_t* header, FILE* handle) {
+    size_t size_read = fread(header, sizeof(rdi_header_t), 1, handle);
     if (size_read != 1) {
-        Rf_error("Incomplete header at offset %d", ftell(data->handle));
+        Rf_error("Incomplete header at offset %d", ftell(handle));
     }
 }
 
-void rdi_read_fixed_leader_data(rdi_fixed_leader_data_t* fixed, read_rdi_data_t* data) {
-    size_t size_read = fread(fixed, sizeof(rdi_fixed_leader_data_t), 1, data->handle);
+void rdi_read_fixed_leader_data(rdi_fixed_leader_data_t* fixed, FILE* handle) {
+    size_t size_read = fread(fixed, sizeof(rdi_fixed_leader_data_t), 1, handle);
     if (size_read != 1) {
-        Rf_error("Incomplete fixed leader data at offset %d", ftell(data->handle));
+        Rf_error("Incomplete fixed leader data at offset %d", ftell(handle));
     }
 }
 
-void rdi_read_variable_leader_data(rdi_variable_leader_data_t* variable, read_rdi_data_t* data) {
-    size_t size_read = fread(variable, sizeof(rdi_fixed_leader_data_t), 1, data->handle);
+void rdi_read_variable_leader_data(rdi_variable_leader_data_t* variable, FILE* handle) {
+    size_t size_read = fread(variable, sizeof(rdi_fixed_leader_data_t), 1, handle);
     if (size_read != 1) {
-        Rf_error("Incomplete variable leader data at offset %d", ftell(data->handle));
+        Rf_error("Incomplete variable leader data at offset %d", ftell(handle));
     }
 }
 
-void rdi_read_bottom_track(rdi_bottom_track_t* bottom_track, read_rdi_data_t* data) {
-    size_t size_read = fread(bottom_track, sizeof(rdi_bottom_track_t), 1, data->handle);
+void rdi_read_bottom_track(rdi_bottom_track_t* bottom_track, FILE* handle) {
+    size_t size_read = fread(bottom_track, sizeof(rdi_bottom_track_t), 1, handle);
     if (size_read != 1) {
-        Rf_error("Incomplete bottom track data at offset %d", ftell(data->handle));
+        Rf_error("Incomplete bottom track data at offset %d", ftell(handle));
     }
 }
 
@@ -113,14 +113,14 @@ SEXP rdi_create_array_container(R_xlen_t size, const char* name) {
 }
 
 void rdi_read_velocity(SEXP velocity_df, R_xlen_t i, 
-                       read_rdi_data_t* data, uint8_t n_beams, uint8_t n_cells) {
+                       FILE* handle, uint8_t n_beams, uint8_t n_cells) {
     // need to advance the cursor past the magic_number
-    uint16_t magic_number = rdi_read_uint16(data);
+    uint16_t magic_number = rdi_read_uint16(handle);
 
     int size = n_beams * n_cells;
 
     int16_t buffer[size];
-    rdi_read_int16_n(buffer, size, data);
+    rdi_read_int16_n(buffer, size, handle);
 
     SEXP velocity = PROTECT(Rf_allocMatrix(REALSXP, n_beams, n_cells));
     double* velocity_values = REAL(velocity);
@@ -139,20 +139,34 @@ void rdi_read_velocity(SEXP velocity_df, R_xlen_t i,
 }
 
 void rdi_read_uint8_array_sexp(SEXP container_df, R_xlen_t i, 
-                               read_rdi_data_t* data, uint8_t n_beams, uint8_t n_cells) {
+                               FILE* handle, uint8_t n_beams, uint8_t n_cells) {
     // need to advance the cursor past the magic_number
-    uint16_t magic_number = rdi_read_uint16(data);
+    uint16_t magic_number = rdi_read_uint16(handle);
     INTEGER(VECTOR_ELT(container_df, 0))[i] = magic_number;
 
     SEXP values = PROTECT(Rf_allocMatrix(RAWSXP, n_beams, n_cells));
-    rdi_read_uint8_n(RAW(values), n_beams * n_cells, data);
+    rdi_read_uint8_n(RAW(values), n_beams * n_cells, handle);
     SET_VECTOR_ELT(VECTOR_ELT(container_df, 1), i, values);
     UNPROTECT(1);
 }
 
-SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
+int rdi_container_type_index(read_rdi_data_t* data, uint16_t data_type) {
+    int n_data_types = Rf_length(data->types);
+    for (int i = 0; i < n_data_types; i++) {
+        if (INTEGER(data->types)[i] == data_type) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ensemble_id) {
+    FILE* handle = data->handle;
+    int n_container_data_types = Rf_length(container);
+
     rdi_header_t header;
-    rdi_read_header(&header, data);
+    rdi_read_header(&header, handle);
 
     // check that this is actually an ensemble header
     if (header.magic_number != RDI_ENSEMBLE_HEADER_UINT16) {
@@ -163,33 +177,31 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
         );
     }
 
-    uint16_t data_offset[header.n_data_types];
-    rdi_read_uint16_n(data_offset, header.n_data_types, data);
+    uint16_t data_offset[n_container_data_types];
+    rdi_read_uint16_n(data_offset, n_container_data_types, handle);
 
     // get machine- and human-readable ids for the data types in this file
     // leave room for the header as the first item
     uint16_t data_type[header.n_data_types];
-    const char* data_type_name[header.n_data_types + 2];
-    data_type_name[0] = "header";
-    data_type_name[header.n_data_types + 1] = "";
+    int container_type_index[header.n_data_types];
     for (uint8_t i = 0; i < header.n_data_types; i++) {
-        rdi_seek_absolute(data, data_offset[i]);
-        data_type[i] = rdi_read_uint16(data);
-        data_type_name[i + 1] = rdi_item_type_label(data_type[i]);
+        rdi_seek_absolute(handle, data_offset[i]);
+        data_type[i] = rdi_read_uint16(handle);
+        container_type_index[i] = rdi_container_type_index(data, data_type[i]);
     }
 
-    // allocate container using the human-readable names
-    SEXP container = PROTECT(Rf_mkNamed(VECSXP, data_type_name));
-    SET_VECTOR_ELT(container, 0, rdi_create_header(1));
-    rdi_set_header(VECTOR_ELT(container, 0), 0, &header, data_offset);
-    SET_VECTOR_ELT(container, 1, Rf_allocVector(VECSXP, header.n_data_types));
-
-    // for each data type, read the type and convert it to a SEXP
-    SEXP item;
+    int container_header_index = rdi_container_type_index(data, RDI_ENSEMBLE_HEADER_UINT16);
+    if (container_header_index != -1) {
+        rdi_set_header(
+            VECTOR_ELT(container, container_header_index), 
+            ensemble_id, &header, data_offset
+        );
+    }
 
     // reading some types requires data from the fixed leader
     // initialize these values so that we can error if the fixed
     // leader hasn't been read yet
+    SEXP item;
     rdi_fixed_leader_data_t fixed;
     fixed.n_beams = 0;
     fixed.n_cells = 0;
@@ -197,56 +209,102 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
     rdi_variable_leader_data_t variable;
     rdi_bottom_track_t bottom_track;
     for (uint8_t i = 0; i < header.n_data_types; i++) {
-        rdi_seek_absolute(data, data_offset[i]);
+        if (container_type_index[i] == -1) {
+            continue;
+        }
+
+        item = VECTOR_ELT(container, container_type_index[i]);
+
+        rdi_seek_absolute(handle, data_offset[i]);
         switch(data_type[i]) {
         case RDI_TYPE_FIXED_LEADER:
-            rdi_read_fixed_leader_data(&fixed, data);
-            item = PROTECT(rdi_create_fixed_leader_data(1));
-            rdi_set_fixed_leader_data(item, 0, &fixed);
+            rdi_read_fixed_leader_data(&fixed, handle);
+            rdi_set_fixed_leader_data(item, ensemble_id, &fixed);
             break;
         case RDI_TYPE_VARIABLE_LEADER:
-            rdi_read_variable_leader_data(&variable, data);
-            item = PROTECT(rdi_create_variable_leader_data(1));
-            rdi_set_variable_leader_data(item, 0, &variable);
+            rdi_read_variable_leader_data(&variable, handle);
+            rdi_set_variable_leader_data(item, ensemble_id, &variable);
             break;
         case RDI_TYPE_BOTTOM_TRACK:
             if (fixed.n_beams != 4) {
                 Rf_error("Can't read bottom track type with n_beams != 4");
             }
-            rdi_read_bottom_track(&bottom_track, data);
-            item = PROTECT(rdi_create_bottom_track(1));
-            rdi_set_bottom_track(item, 0, &bottom_track);
+            rdi_read_bottom_track(&bottom_track, handle);
+            rdi_set_bottom_track(item, ensemble_id, &bottom_track);
             break;
         case RDI_TYPE_VELOCITY:
             if (fixed.n_beams == 0) {
                 Rf_error("Can't read velocity type without fixed leader data");
             }
-            item = PROTECT(rdi_create_array_container(1, "velocity"));
-            rdi_read_velocity(item, 0, data, fixed.n_beams, fixed.n_cells);
+            rdi_read_velocity(item, ensemble_id, handle, fixed.n_beams, fixed.n_cells);
             break;
         case RDI_TYPE_CORRELATION:
         case RDI_TYPE_ECHO_INTENSITY:
         case RDI_TYPE_PCT_GOOD:
-            item = PROTECT(rdi_create_array_container(1, data_type_name[i + 1]));
-            rdi_read_uint8_array_sexp(item, 0, data, fixed.n_beams, fixed.n_cells);
+            rdi_read_uint8_array_sexp(item, ensemble_id, handle, fixed.n_beams, fixed.n_cells);
             break;
         default:
             // unsupported columns are reported elsewhere
             break;
         }
-
-        SET_VECTOR_ELT(container, i + 1, item);
-        UNPROTECT(1);
     }
-
-    UNPROTECT(1);
-    return container;
 }
 
 SEXP readrdi_read_rdi_impl(void* data_void) {
     read_rdi_data_t* data = (read_rdi_data_t*) data_void;
-    rdi_seek_absolute(data, data->offset);
-    return rdi_read_ensemble_sexp(data);
+
+    int n_data_types = Rf_length(data->types);
+    int* data_type = INTEGER(data->types);
+    R_xlen_t n_ensembles = Rf_xlength(data->offset);
+
+    // alloc the container
+    SEXP container = PROTECT(Rf_allocVector(VECSXP, n_data_types));
+    Rf_setAttrib(container, R_NamesSymbol, Rf_getAttrib(data->types, R_NamesSymbol));
+
+    // alloc the individual components
+    SEXP item;
+    for (int i = 0; i < n_data_types; i++) {
+        switch(data_type[i]) {
+        case RDI_ENSEMBLE_HEADER_UINT16:
+            item = PROTECT(rdi_create_header(1));
+            break;
+        case RDI_TYPE_FIXED_LEADER:
+            item = PROTECT(rdi_create_fixed_leader_data(1));
+            break;
+        case RDI_TYPE_VARIABLE_LEADER:
+            item = PROTECT(rdi_create_variable_leader_data(1));
+            break;
+        case RDI_TYPE_BOTTOM_TRACK:
+            item = PROTECT(rdi_create_bottom_track(1));
+            break;
+        case RDI_TYPE_VELOCITY:
+            item = PROTECT(rdi_create_array_container(1, "velocity"));
+            break;
+        case RDI_TYPE_CORRELATION:
+            item = PROTECT(rdi_create_array_container(1, "correlation"));
+            break;
+        case RDI_TYPE_ECHO_INTENSITY:
+            item = PROTECT(rdi_create_array_container(1, "echo_intensity"));
+            break;
+        case RDI_TYPE_PCT_GOOD:
+            item = PROTECT(rdi_create_array_container(1, "pct_good"));
+            break;
+        default:
+            Rf_error("Unsupported rdi data type: %d", data_type[i]);
+        }
+
+        SET_VECTOR_ELT(container, i, item);
+        UNPROTECT(1);
+    }
+
+    // read each ensemble pointed to by offset
+    for (R_xlen_t i = 0; i < n_ensembles; i++) {
+        rdi_seek_absolute(data->handle, REAL(data->offset)[i]);
+        rdi_read_ensemble_sexp(data, container, i);
+    }
+
+    UNPROTECT(1);
+    return container;
 }
 
 void readrdi_read_rdi_cleanup(void* data_void) {
@@ -258,9 +316,8 @@ void readrdi_read_rdi_cleanup(void* data_void) {
     free(data);
 }
 
-SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset) {
+SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset, SEXP types) {
     const char* filename_chr = Rf_translateChar(STRING_ELT(filename, 0));
-    int offset_int = INTEGER(offset)[0];
 
     FILE* handle = fopen(filename_chr, "rb");
     if (handle == NULL) {
@@ -274,7 +331,8 @@ SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset) {
     }
 
     data->handle = handle;
-    data->offset = offset_int;
+    data->offset = offset;
+    data->types = types;
 
     return R_ExecWithCleanup(&readrdi_read_rdi_impl, data, &readrdi_read_rdi_cleanup, data);
 }

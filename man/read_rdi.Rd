@@ -4,6 +4,7 @@
 \alias{read_rdi}
 \alias{guess_rdi_types}
 \alias{rdi_index}
+\alias{rdi_detect_data_types}
 \title{Read RDI files}
 \usage{
 read_rdi(file, types = guess_rdi_types(file))
@@ -11,6 +12,8 @@ read_rdi(file, types = guess_rdi_types(file))
 guess_rdi_types(file)
 
 rdi_index(file, offset = 0, n_max = -1)
+
+rdi_detect_data_types(file, index = rdi_index(file, n_max = 100))
 }
 \arguments{
 \item{file}{A filename from which to read}

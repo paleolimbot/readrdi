@@ -58,6 +58,11 @@ test_that("rdi_index() works on multiple ensembles in one file", {
   unlink(tmp_multi)
 })
 
+test_that("rdi_detect_data_types() works", {
+  file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  rdi_detect_data_types(file)
+})
+
 test_that("read_rdi() works", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
 
