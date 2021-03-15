@@ -103,13 +103,13 @@ void rdi_read_bottom_track(rdi_bottom_track_t* bottom_track, read_rdi_data_t* da
 
 // auto-generating these doesn't work well because the
 // objects have a variable length depending on values from the leader data
-SEXP rdi_create_velocity(R_xlen_t size) {
-    const char* velocity_names[] = {"magic_number", "velocity", ""};
-    SEXP velocity_df = PROTECT(Rf_mkNamed(VECSXP, velocity_names));
-    SET_VECTOR_ELT(velocity_df, 0, Rf_allocVector(INTSXP, size));
-    SET_VECTOR_ELT(velocity_df, 1, Rf_allocVector(VECSXP, size));
+SEXP rdi_create_array_container(R_xlen_t size, const char* name) {
+    const char* df_names[] = {"magic_number", name, ""};
+    SEXP result = PROTECT(Rf_mkNamed(VECSXP, df_names));
+    SET_VECTOR_ELT(result, 0, Rf_allocVector(INTSXP, size));
+    SET_VECTOR_ELT(result, 1, Rf_allocVector(VECSXP, size));
     UNPROTECT(1);
-    return velocity_df;
+    return result;
 }
 
 void rdi_read_velocity(SEXP velocity_df, R_xlen_t i, 
@@ -138,24 +138,16 @@ void rdi_read_velocity(SEXP velocity_df, R_xlen_t i,
     UNPROTECT(1);
 }
 
-SEXP rdi_read_uint8_array_sexp(read_rdi_data_t* data, const char* name,
-                               uint8_t n_beams, uint8_t n_cells) {
+void rdi_read_uint8_array_sexp(SEXP container_df, R_xlen_t i, 
+                               read_rdi_data_t* data, uint8_t n_beams, uint8_t n_cells) {
     // need to advance the cursor past the magic_number
     uint16_t magic_number = rdi_read_uint16(data);
+    INTEGER(VECTOR_ELT(container_df, 0))[i] = magic_number;
 
     SEXP values = PROTECT(Rf_allocMatrix(RAWSXP, n_beams, n_cells));
     rdi_read_uint8_n(RAW(values), n_beams * n_cells, data);
-
-    const char* df_names[] = {"magic_number", name, ""};
-    SEXP result = PROTECT(Rf_mkNamed(VECSXP, df_names));
-    SET_VECTOR_ELT(result, 0, Rf_ScalarInteger(magic_number));
-
-    // list-coumn with matrix as the item
-    SET_VECTOR_ELT(result, 1, Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(VECTOR_ELT(result, 1), 0, values);
-
-    UNPROTECT(2);
-    return result;
+    SET_VECTOR_ELT(VECTOR_ELT(container_df, 1), i, values);
+    UNPROTECT(1);
 }
 
 SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
@@ -229,16 +221,17 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
             if (fixed.n_beams == 0) {
                 Rf_error("Can't read velocity type without fixed leader data");
             }
-            item = PROTECT(rdi_create_velocity(1));
+            item = PROTECT(rdi_create_array_container(1, "velocity"));
             rdi_read_velocity(item, 0, data, fixed.n_beams, fixed.n_cells);
             break;
         case RDI_TYPE_CORRELATION:
         case RDI_TYPE_ECHO_INTENSITY:
         case RDI_TYPE_PCT_GOOD:
-            item = PROTECT(rdi_read_uint8_array_sexp(data, data_type_name[i + 1], fixed.n_beams, fixed.n_cells));
+            item = PROTECT(rdi_create_array_container(1, data_type_name[i + 1]));
+            rdi_read_uint8_array_sexp(item, 0, data, fixed.n_beams, fixed.n_cells);
             break;
         default:
-            item = PROTECT(R_NilValue);
+            // unsupported columns are reported elsewhere
             break;
         }
 
