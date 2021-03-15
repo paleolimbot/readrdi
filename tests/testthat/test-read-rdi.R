@@ -3,12 +3,17 @@ test_that("rdi_index() works on single-ensemble files", {
   single_file <- system.file("extdata/19101018.rdi", package = "readrdi")
   expect_identical(
     rdi_index(single_file, offset = 0),
-    data.frame(offset = 0, size = 739, checksum = 10383)
+    data.frame(offset = 0, size = 739, checksum = 10383, checksum_calc = 10383)
   )
 
   expect_identical(
     rdi_index(single_file, offset = 1),
-    data.frame(offset = double(), size = double(), checksum = double())
+    data.frame(
+      offset = double(),
+      size = double(),
+      checksum = double(),
+      checksum_calc = double()
+    )
   )
 })
 

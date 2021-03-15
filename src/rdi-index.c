@@ -42,6 +42,25 @@ int rdi_search_for_header_start(rdi_index_data_t* data) {
     return 0;
 }
 
+uint16_t rdi_checksum(rdi_index_data_t* data, long offset, uint16_t bytes) {
+    if (fseek(data->handle, offset, SEEK_SET) != 0) {
+        Rf_error("Failed to seek to offset %d", offset);
+    }
+
+    unsigned char buf[bytes];
+    if (fread(buf, sizeof(unsigned char), bytes, data->handle) != bytes) {
+        Rf_error("Failed to read %d bytes at offset %d", bytes, offset);
+    }
+
+    // this checksum is literally a sum of the byte values
+    uint16_t checksum = 0;
+    for (uint16_t i = 0; i < bytes; i++) {
+        checksum += buf[i];
+    }
+
+    return checksum;
+}
+
 SEXP readrdi_read_rdi_index_impl(void* data_void) {
     rdi_index_data_t* data = (rdi_index_data_t*) data_void;
     rdi_header_t header;
@@ -61,7 +80,7 @@ SEXP readrdi_read_rdi_index_impl(void* data_void) {
 
     R_xlen_t n = 0;
     long item_offset;
-    uint16_t checksum;
+    uint16_t checksum, checksum_calc;
     SEXP new_result;
     SEXP item;
     while (rdi_search_for_header_start(data)) {
@@ -95,10 +114,14 @@ SEXP readrdi_read_rdi_index_impl(void* data_void) {
             break;
         }
 
-        item = PROTECT(Rf_allocVector(REALSXP, 3));
+        // seek to start of ensemble an recalculate checksum
+        checksum_calc = rdi_checksum(data, item_offset, header.bytes_per_ensemble);
+
+        item = PROTECT(Rf_allocVector(REALSXP, 4));
         REAL(item)[0] = item_offset;
         REAL(item)[1] = header.bytes_per_ensemble;
         REAL(item)[2] = checksum;
+        REAL(item)[3] = checksum_calc;
         SET_VECTOR_ELT(data->result, n, item);
         UNPROTECT(1);
 

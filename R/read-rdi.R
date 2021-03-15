@@ -50,7 +50,8 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
     list(
       offset = vapply(index_transposed, "[", 1L, FUN.VALUE = double(1)),
       size = vapply(index_transposed, "[", 2L, FUN.VALUE = double(1)),
-      checksum = vapply(index_transposed, "[", 3L, FUN.VALUE = double(1))
+      checksum = vapply(index_transposed, "[", 3L, FUN.VALUE = double(1)),
+      checksum_calc = vapply(index_transposed, "[", 4L, FUN.VALUE = double(1))
     )
   )
 }
