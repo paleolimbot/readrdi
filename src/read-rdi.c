@@ -8,6 +8,14 @@
 #include "read-rdi-common.h"
 #include "read-rdi-sexp.h"
 
+// A wrapper around the file handle and any options passed in
+// from R. This is needed for R_ExecWithCleanup() but is also a
+// nice abstraction around the file types
+typedef struct {
+    FILE* handle;
+    int offset;
+} read_rdi_data_t;
+
 void rdi_seek_absolute(read_rdi_data_t* data, size_t offset) {
     if (fseek(data->handle, offset, SEEK_SET) != 0) {
         Rf_error("Seek to file offset %d failed", offset);
@@ -260,6 +268,7 @@ SEXP readrdi_c_read_rdi(SEXP filename, SEXP offset) {
 
     read_rdi_data_t* data = (read_rdi_data_t*) malloc(sizeof(read_rdi_data_t));
     if (data == NULL) {
+        fclose(handle);
         Rf_error("Failed to allocate file handle data");
     }
 

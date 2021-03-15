@@ -10,13 +10,19 @@ read_rdi(file, types = guess_rdi_types(file))
 
 guess_rdi_types(file)
 
-rdi_index(file, offset = 0L)
+rdi_index(file, offset = 0, n_max = -1)
 }
 \arguments{
 \item{file}{A filename from which to read}
 
 \item{types}{The variable types to extract from the file.
 Defaults to all variable types found in the first file.}
+
+\item{offset}{Where to start looking for ensemble start indicators
+for \code{\link[=rdi_index]{rdi_index()}} or a vector of ensemble start offsets (probably derived
+from \code{\link[=rdi_index]{rdi_index()}}) for \code{\link[=read_rdi]{read_rdi()}}.}
+
+\item{n_max}{Maximum number of ensembles to index}
 }
 \value{
 A \code{list()} with one component for each

@@ -1,4 +1,36 @@
 
+test_that("rdi_index() works on multiple ensembles in one file", {
+  # need to combine a few versions of the file to get a more realistic thing
+  # to index
+  single_file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  file_in <- file(single_file, "rb")
+  single_file_bin <- readBin(file_in, "raw", file.size(single_file))
+  close(file_in)
+
+  tmp_multi <- tempfile()
+  file_out <- file(tmp_multi, open = "wb")
+  writeBin(single_file_bin, file_out)
+  writeBin(single_file_bin, file_out)
+  # write some garbage to make sure some searching has to happen
+  writeBin(as.raw(1:5), file_out)
+  writeBin(single_file_bin, file_out)
+  close(file_out)
+
+  # the ensemble size is two bytes less than one might expect
+  # because there is a two byte checksum and the number of bytes
+  # indicated by the header either doesn't include the 0x7f7f or
+  # doesn't include the checksum.
+  index <- rdi_index(tmp_multi)
+
+  expect_true(all(index$size == 739))
+  expect_identical(nrow(index), 3L)
+  expect_identical(index$offset[1], 0)
+  expect_identical(index$offset[2], 739 + 2)
+  expect_identical(index$offset[3], 739 + 2 + 739 + 2 + 5)
+
+  unlink(tmp_multi)
+})
+
 test_that("read_rdi() works", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
 

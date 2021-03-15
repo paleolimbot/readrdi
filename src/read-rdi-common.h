@@ -169,12 +169,4 @@ static inline const char* rdi_item_type_label(uint16_t magic_number) {
     }
 }
 
-// A wrapper around the file handle and any options passed in
-// from R. This is needed for R_ExecWithCleanup() but is also a
-// nice abstraction around the file types
-typedef struct {
-    FILE* handle;
-    int offset;
-} read_rdi_data_t;
-
 #endif

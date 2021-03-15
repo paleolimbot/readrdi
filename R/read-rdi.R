@@ -4,6 +4,10 @@
 #' @param file A filename from which to read
 #' @param types The variable types to extract from the file.
 #'   Defaults to all variable types found in the first file.
+#' @param offset Where to start looking for ensemble start indicators
+#'   for [rdi_index()] or a vector of ensemble start offsets (probably derived
+#'   from [rdi_index()]) for [read_rdi()].
+#' @param n_max Maximum number of ensembles to index
 #'
 #' @return A `list()` with one component for each
 #'
@@ -33,9 +37,21 @@ guess_rdi_types <- function(file) {
 
 #' @rdname read_rdi
 #' @export
-rdi_index <- function(file, offset = 0L) {
+rdi_index <- function(file, offset = 0, n_max = -1) {
   file <- path.expand(file)
-  rdi <- .Call("readrdi_c_rdi_index", file, as.integer(offset)[1])
+  index_transposed <- .Call(
+    "readrdi_c_rdi_index",
+    file,
+    as.double(offset)[1],
+    as.double(n_max)[1]
+  )
+
+  new_data_frame(
+    list(
+      offset = vapply(index_transposed, "[", 1L, FUN.VALUE = double(1)),
+      size = vapply(index_transposed, "[", 2L, FUN.VALUE = double(1))
+    )
+  )
 }
 
 # Currently the C code just reads one ensemble at a time and reads
