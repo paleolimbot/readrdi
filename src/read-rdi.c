@@ -205,18 +205,21 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
         switch(data_type[i]) {
         case RDI_TYPE_FIXED_LEADER:
             rdi_read_fixed_leader_data(&fixed, data);
-            item = PROTECT(rdi_fixed_leader_data_list(&fixed));
+            item = PROTECT(rdi_create_fixed_leader_data(1));
+            rdi_set_fixed_leader_data(item, 0, &fixed);
             break;
         case RDI_TYPE_VARIABLE_LEADER:
             rdi_read_variable_leader_data(&variable, data);
-            item = PROTECT(rdi_variable_leader_data_list(&variable));
+            item = PROTECT(rdi_create_variable_leader_data(1));
+            rdi_set_variable_leader_data(item, 0, &variable);
             break;
         case RDI_TYPE_BOTTOM_TRACK:
             if (fixed.n_beams != 4) {
                 Rf_error("Can't read bottom track type with n_beams != 4");
             }
             rdi_read_bottom_track(&bottom_track, data);
-            item = PROTECT(rdi_bottom_track_list(&bottom_track));
+            item = PROTECT(rdi_create_bottom_track(1));
+            rdi_set_bottom_track(item, 0, &bottom_track);
             break;
         case RDI_TYPE_VELOCITY:
             if (fixed.n_beams == 0) {
@@ -230,7 +233,7 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
             item = PROTECT(rdi_read_uint8_array_sexp(data, data_type_name[i + 1], fixed.n_beams, fixed.n_cells));
             break;
         default:
-            item = PROTECT(rdi_unknown_list(data_type[i]));
+            item = PROTECT(R_NilValue);
             break;
         }
 
