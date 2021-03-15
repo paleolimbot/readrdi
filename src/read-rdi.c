@@ -185,7 +185,8 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
 
     // allocate container using the human-readable names
     SEXP container = PROTECT(Rf_mkNamed(VECSXP, data_type_name));
-    SET_VECTOR_ELT(container, 0, rdi_header_list(&header, data_offset));
+    SET_VECTOR_ELT(container, 0, rdi_create_header(1));
+    rdi_set_header(VECTOR_ELT(container, 0), 0, &header, data_offset);
     SET_VECTOR_ELT(container, 1, Rf_allocVector(VECSXP, header.n_data_types));
 
     // for each data type, read the type and convert it to a SEXP
