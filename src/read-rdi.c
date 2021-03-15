@@ -101,9 +101,19 @@ void rdi_read_bottom_track(rdi_bottom_track_t* bottom_track, read_rdi_data_t* da
     }
 }
 
-// separating these into a read -> create SEXP doesn't work well because the
+// auto-generating these doesn't work well because the
 // objects have a variable length depending on values from the leader data
-SEXP rdi_read_velocity_sexp(read_rdi_data_t* data, uint8_t n_beams, uint8_t n_cells) {
+SEXP rdi_create_velocity(R_xlen_t size) {
+    const char* velocity_names[] = {"magic_number", "velocity", ""};
+    SEXP velocity_df = PROTECT(Rf_mkNamed(VECSXP, velocity_names));
+    SET_VECTOR_ELT(velocity_df, 0, Rf_allocVector(INTSXP, size));
+    SET_VECTOR_ELT(velocity_df, 1, Rf_allocVector(VECSXP, size));
+    UNPROTECT(1);
+    return velocity_df;
+}
+
+void rdi_read_velocity(SEXP velocity_df, R_xlen_t i, 
+                       read_rdi_data_t* data, uint8_t n_beams, uint8_t n_cells) {
     // need to advance the cursor past the magic_number
     uint16_t magic_number = rdi_read_uint16(data);
 
@@ -123,16 +133,9 @@ SEXP rdi_read_velocity_sexp(read_rdi_data_t* data, uint8_t n_beams, uint8_t n_ce
         }
     }
 
-    const char* velocity_names[] = {"magic_number", "velocity", ""};
-    SEXP result = PROTECT(Rf_mkNamed(VECSXP, velocity_names));
-    SET_VECTOR_ELT(result, 0, Rf_ScalarInteger(magic_number));
-
-    // list-coumn with velocity as the item
-    SET_VECTOR_ELT(result, 1, Rf_allocVector(VECSXP, 1));
-    SET_VECTOR_ELT(VECTOR_ELT(result, 1), 0, velocity);
-
-    UNPROTECT(2);
-    return result;
+    INTEGER(VECTOR_ELT(velocity_df, 0))[i] = magic_number;    
+    SET_VECTOR_ELT(VECTOR_ELT(velocity_df, 1), i, velocity);
+    UNPROTECT(1);
 }
 
 SEXP rdi_read_uint8_array_sexp(read_rdi_data_t* data, const char* name,
@@ -226,7 +229,8 @@ SEXP rdi_read_ensemble_sexp(read_rdi_data_t* data) {
             if (fixed.n_beams == 0) {
                 Rf_error("Can't read velocity type without fixed leader data");
             }
-            item = PROTECT(rdi_read_velocity_sexp(data, fixed.n_beams, fixed.n_cells));
+            item = PROTECT(rdi_create_velocity(1));
+            rdi_read_velocity(item, 0, data, fixed.n_beams, fixed.n_cells);
             break;
         case RDI_TYPE_CORRELATION:
         case RDI_TYPE_ECHO_INTENSITY:
