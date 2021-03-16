@@ -86,6 +86,29 @@ test_that("read_rdi() works", {
   )
 })
 
+test_that("read_rdi() works for multi-ensemble files", {
+  file <- system.file("extdata/19101018.rdi", package = "readrdi")
+
+  single_file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  file_in <- file(single_file, "rb")
+  single_file_bin <- readBin(file_in, "raw", file.size(single_file))
+  close(file_in)
+
+  tmp_multi <- tempfile()
+  file_out <- file(tmp_multi, open = "wb")
+  writeBin(single_file_bin, file_out)
+  writeBin(single_file_bin, file_out)
+  close(file_out)
+
+  rdi <- read_rdi(tmp_multi)
+
+  expect_identical(
+    rdi$variable_leader$real_time_clock,
+    rep("19-10-10 18:00:03.08", 2)
+  )
+})
+
+
 test_that("read_rdi() works for filenames with non ASCII characters", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
   temp_dir <- tempfile()

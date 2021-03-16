@@ -56,11 +56,10 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
 #' @rdname read_rdi
 #' @export
 rdi_detect_data_types <- function(file, index = rdi_index(file, n_max = 100)) {
-  headers <- .Call(
-    "readrdi_c_read_rdi",
+  headers <- read_rdi_internal(
     file,
-    as.numeric(index$offset),
-    c("header" = as.integer(0x7f7f))
+    index = index,
+    data_types = c("header" = as.integer(0x7f7f))
   )
 
   all_headers <- c(as.integer(0x7f7f), unique(unlist(headers$header$data_type)))

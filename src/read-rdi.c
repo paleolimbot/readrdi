@@ -266,28 +266,28 @@ SEXP readrdi_read_rdi_impl(void* data_void) {
     for (int i = 0; i < n_data_types; i++) {
         switch(data_type[i]) {
         case RDI_ENSEMBLE_HEADER_UINT16:
-            item = PROTECT(rdi_create_header(1));
+            item = PROTECT(rdi_create_header(n_ensembles));
             break;
         case RDI_TYPE_FIXED_LEADER:
-            item = PROTECT(rdi_create_fixed_leader_data(1));
+            item = PROTECT(rdi_create_fixed_leader_data(n_ensembles));
             break;
         case RDI_TYPE_VARIABLE_LEADER:
-            item = PROTECT(rdi_create_variable_leader_data(1));
+            item = PROTECT(rdi_create_variable_leader_data(n_ensembles));
             break;
         case RDI_TYPE_BOTTOM_TRACK:
-            item = PROTECT(rdi_create_bottom_track(1));
+            item = PROTECT(rdi_create_bottom_track(n_ensembles));
             break;
         case RDI_TYPE_VELOCITY:
-            item = PROTECT(rdi_create_array_container(1, "velocity"));
+            item = PROTECT(rdi_create_array_container(n_ensembles, "velocity"));
             break;
         case RDI_TYPE_CORRELATION:
-            item = PROTECT(rdi_create_array_container(1, "correlation"));
+            item = PROTECT(rdi_create_array_container(n_ensembles, "correlation"));
             break;
         case RDI_TYPE_ECHO_INTENSITY:
-            item = PROTECT(rdi_create_array_container(1, "echo_intensity"));
+            item = PROTECT(rdi_create_array_container(n_ensembles, "echo_intensity"));
             break;
         case RDI_TYPE_PCT_GOOD:
-            item = PROTECT(rdi_create_array_container(1, "pct_good"));
+            item = PROTECT(rdi_create_array_container(n_ensembles, "pct_good"));
             break;
         default:
             Rf_error("Unsupported rdi data type: %d", data_type[i]);
