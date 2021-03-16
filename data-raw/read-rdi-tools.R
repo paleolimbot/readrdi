@@ -46,8 +46,23 @@ rdi_item_struct <- c(fld_struct, vld_struct, btm_track_struct) %>%
       c_type == "uint8_t" ~ "RAWSXP",
       TRUE ~ "INTSXP"
     ),
+    r_c_ptr = case_when(
+      !is.na(c_size) ~ NA_character_,
+      c_type %in% c("uint16_scaled_by_100_t", "int16_scaled_by_100_t", "uint8_scaled_by_10_t") ~ "REAL",
+      c_type == "uint8_t" ~ "REAL",
+      TRUE ~ "INTEGER"
+    ),
     r_c_create = glue(
       "SET_VECTOR_ELT({ type }_df, { c_index }, Rf_allocVector({ r_c_type }, size));"
+    ),
+    r_c_initialize = case_when(
+      r_c_type == "VECSXP" ~ "// VECSXP already initialized to R_NilValue",
+      r_c_type == "RAWSXP" ~ as.character(glue("memset(RAW(VECTOR_ELT({ type }_df, { c_index })), 0, size);")),
+      TRUE ~ as.character(glue(
+        "
+        SEXP item{ c_index } = VECTOR_ELT({ type }_df, { c_index }); for (R_xlen_t i = 0; i < size; i++) { r_c_ptr }(item{ c_index })[i] = NA_{ r_c_ptr };
+        "
+      ))
     ),
     r_c_set = case_when(
       r_c_type == "VECSXP" ~
@@ -85,6 +100,7 @@ SEXP rdi_create_fixed_leader_data(R_xlen_t size) {{
     const char* { type[1] }_df_names[] = {{ { paste0('\"', c_name , '\"', collapse = ', ') }  , \"\"}};
     SEXP { type[1] }_df = PROTECT(Rf_mkNamed(VECSXP, { type[1] }_df_names));
 { paste0('    ', r_c_create, collapse = '\n') }
+{ paste0('    ', r_c_initialize, collapse = '\n') }
     UNPROTECT(1);
     return { type[1] }_df;
 }}
@@ -105,6 +121,7 @@ SEXP rdi_create_variable_leader_data(R_xlen_t size) {{
     const char* { type[1] }_df_names[] = {{ { paste0('\"', c_name , '\"', collapse = ', ') }  , \"\"}};
     SEXP { type[1] }_df = PROTECT(Rf_mkNamed(VECSXP, { type[1] }_df_names));
 { paste0('    ', r_c_create, collapse = '\n') }
+{ paste0('    ', r_c_initialize, collapse = '\n') }
     UNPROTECT(1);
     return { type[1] }_df;
 }}
@@ -125,6 +142,7 @@ SEXP rdi_create_bottom_track(R_xlen_t size) {{
     const char* { type[1] }_df_names[] = {{ { paste0('\"', c_name , '\"', collapse = ', ') }  , \"\"}};
     SEXP { type[1] }_df = PROTECT(Rf_mkNamed(VECSXP, { type[1] }_df_names));
 { paste0('    ', r_c_create, collapse = '\n') }
+{ paste0('    ', r_c_initialize, collapse = '\n') }
     UNPROTECT(1);
     return { type[1] }_df;
 }}

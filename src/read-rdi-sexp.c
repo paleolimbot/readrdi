@@ -74,6 +74,39 @@ SEXP rdi_create_fixed_leader_data(R_xlen_t size) {
     SET_VECTOR_ELT(fixed_df, 30, Rf_allocVector(RAWSXP, size));
     SET_VECTOR_ELT(fixed_df, 31, Rf_allocVector(VECSXP, size));
     SET_VECTOR_ELT(fixed_df, 32, Rf_allocVector(RAWSXP, size));
+    SEXP item0 = VECTOR_ELT(fixed_df, 0); for (R_xlen_t i = 0; i < size; i++) INTEGER(item0)[i] = NA_INTEGER;
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
+    memset(RAW(VECTOR_ELT(fixed_df, 3)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 4)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 5)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 6)), 0, size);
+    SEXP item7 = VECTOR_ELT(fixed_df, 7); for (R_xlen_t i = 0; i < size; i++) INTEGER(item7)[i] = NA_INTEGER;
+    SEXP item8 = VECTOR_ELT(fixed_df, 8); for (R_xlen_t i = 0; i < size; i++) REAL(item8)[i] = NA_REAL;
+    SEXP item9 = VECTOR_ELT(fixed_df, 9); for (R_xlen_t i = 0; i < size; i++) REAL(item9)[i] = NA_REAL;
+    memset(RAW(VECTOR_ELT(fixed_df, 10)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 11)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 12)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 13)), 0, size);
+    SEXP item14 = VECTOR_ELT(fixed_df, 14); for (R_xlen_t i = 0; i < size; i++) INTEGER(item14)[i] = NA_INTEGER;
+    memset(RAW(VECTOR_ELT(fixed_df, 15)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 16)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 17)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 18)), 0, size);
+    SEXP item19 = VECTOR_ELT(fixed_df, 19); for (R_xlen_t i = 0; i < size; i++) REAL(item19)[i] = NA_REAL;
+    SEXP item20 = VECTOR_ELT(fixed_df, 20); for (R_xlen_t i = 0; i < size; i++) REAL(item20)[i] = NA_REAL;
+    memset(RAW(VECTOR_ELT(fixed_df, 21)), 0, size);
+    memset(RAW(VECTOR_ELT(fixed_df, 22)), 0, size);
+    SEXP item23 = VECTOR_ELT(fixed_df, 23); for (R_xlen_t i = 0; i < size; i++) REAL(item23)[i] = NA_REAL;
+    SEXP item24 = VECTOR_ELT(fixed_df, 24); for (R_xlen_t i = 0; i < size; i++) REAL(item24)[i] = NA_REAL;
+    SEXP item25 = VECTOR_ELT(fixed_df, 25); for (R_xlen_t i = 0; i < size; i++) INTEGER(item25)[i] = NA_INTEGER;
+    memset(RAW(VECTOR_ELT(fixed_df, 26)), 0, size);
+    SEXP item27 = VECTOR_ELT(fixed_df, 27); for (R_xlen_t i = 0; i < size; i++) INTEGER(item27)[i] = NA_INTEGER;
+    // VECSXP already initialized to R_NilValue
+    SEXP item29 = VECTOR_ELT(fixed_df, 29); for (R_xlen_t i = 0; i < size; i++) INTEGER(item29)[i] = NA_INTEGER;
+    memset(RAW(VECTOR_ELT(fixed_df, 30)), 0, size);
+    // VECSXP already initialized to R_NilValue
+    memset(RAW(VECTOR_ELT(fixed_df, 32)), 0, size);
     UNPROTECT(1);
     return fixed_df;
 }
@@ -106,6 +139,31 @@ SEXP rdi_create_variable_leader_data(R_xlen_t size) {
     SET_VECTOR_ELT(variable_df, 22, Rf_allocVector(RAWSXP, size));
     SET_VECTOR_ELT(variable_df, 23, Rf_allocVector(VECSXP, size));
     SET_VECTOR_ELT(variable_df, 24, Rf_allocVector(VECSXP, size));
+    SEXP item0 = VECTOR_ELT(variable_df, 0); for (R_xlen_t i = 0; i < size; i++) INTEGER(item0)[i] = NA_INTEGER;
+    SEXP item1 = VECTOR_ELT(variable_df, 1); for (R_xlen_t i = 0; i < size; i++) INTEGER(item1)[i] = NA_INTEGER;
+    // VECSXP already initialized to R_NilValue
+    memset(RAW(VECTOR_ELT(variable_df, 3)), 0, size);
+    SEXP item4 = VECTOR_ELT(variable_df, 4); for (R_xlen_t i = 0; i < size; i++) INTEGER(item4)[i] = NA_INTEGER;
+    SEXP item5 = VECTOR_ELT(variable_df, 5); for (R_xlen_t i = 0; i < size; i++) INTEGER(item5)[i] = NA_INTEGER;
+    SEXP item6 = VECTOR_ELT(variable_df, 6); for (R_xlen_t i = 0; i < size; i++) INTEGER(item6)[i] = NA_INTEGER;
+    SEXP item7 = VECTOR_ELT(variable_df, 7); for (R_xlen_t i = 0; i < size; i++) REAL(item7)[i] = NA_REAL;
+    SEXP item8 = VECTOR_ELT(variable_df, 8); for (R_xlen_t i = 0; i < size; i++) REAL(item8)[i] = NA_REAL;
+    SEXP item9 = VECTOR_ELT(variable_df, 9); for (R_xlen_t i = 0; i < size; i++) REAL(item9)[i] = NA_REAL;
+    SEXP item10 = VECTOR_ELT(variable_df, 10); for (R_xlen_t i = 0; i < size; i++) INTEGER(item10)[i] = NA_INTEGER;
+    SEXP item11 = VECTOR_ELT(variable_df, 11); for (R_xlen_t i = 0; i < size; i++) REAL(item11)[i] = NA_REAL;
+    memset(RAW(VECTOR_ELT(variable_df, 12)), 0, size);
+    SEXP item13 = VECTOR_ELT(variable_df, 13); for (R_xlen_t i = 0; i < size; i++) REAL(item13)[i] = NA_REAL;
+    SEXP item14 = VECTOR_ELT(variable_df, 14); for (R_xlen_t i = 0; i < size; i++) REAL(item14)[i] = NA_REAL;
+    memset(RAW(VECTOR_ELT(variable_df, 15)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 16)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 17)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 18)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 19)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 20)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 21)), 0, size);
+    memset(RAW(VECTOR_ELT(variable_df, 22)), 0, size);
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
     UNPROTECT(1);
     return variable_df;
 }
@@ -120,6 +178,13 @@ SEXP rdi_create_bottom_track(R_xlen_t size) {
     SET_VECTOR_ELT(bottom_track_df, 4, Rf_allocVector(VECSXP, size));
     SET_VECTOR_ELT(bottom_track_df, 5, Rf_allocVector(VECSXP, size));
     SET_VECTOR_ELT(bottom_track_df, 6, Rf_allocVector(VECSXP, size));
+    SEXP item0 = VECTOR_ELT(bottom_track_df, 0); for (R_xlen_t i = 0; i < size; i++) INTEGER(item0)[i] = NA_INTEGER;
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
+    // VECSXP already initialized to R_NilValue
     UNPROTECT(1);
     return bottom_track_df;
 }
