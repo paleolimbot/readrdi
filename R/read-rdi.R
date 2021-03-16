@@ -127,6 +127,7 @@ read_rdi_fix_fixed_leader <- function(item) {
   item$serial_number <- vapply(
     item$serial_number,
     function(element) {
+      if (is.null(element)) return(NA_integer_)
       readBin(
         as.raw(element),
         "integer", n = 1, size = 4, endian = "little", signed = TRUE
@@ -152,6 +153,7 @@ read_rdi_fix_fixed_leader <- function(item) {
   item$system_config <- vapply(
     item$system_config,
     function(element) {
+      if (is.null(element)) return(NA_integer_)
       readBin(
         as.raw(element),
         "integer", n = 1, size = 2, endian = "big", signed = FALSE
@@ -168,6 +170,7 @@ read_rdi_fix_variable_leader <- function(item) {
   item$real_time_clock <- vapply(
     item$real_time_clock,
     function(rtc) {
+      if (is.null(rtc)) return(NA_character_)
       sprintf(
         # "%y-%m-%d %H:%M:%OS"
         "%02d-%02d-%02d %02d:%02d:%02d.%02d",
@@ -182,6 +185,7 @@ read_rdi_fix_variable_leader <- function(item) {
   item$pressure <- vapply(
     item$pressure,
     function(element) {
+      if (is.null(element)) return(NA_real_)
       readBin(
         as.raw(element),
         "integer", n = 1, size = 4, endian = "little", signed = TRUE
@@ -193,6 +197,7 @@ read_rdi_fix_variable_leader <- function(item) {
   item$pressure_std <- vapply(
     item$pressure_std,
     function(element) {
+      if (is.null(element)) return(NA_real_)
       readBin(
         as.raw(element),
         "integer", n = 1, size = 4, endian = "little", signed = TRUE
