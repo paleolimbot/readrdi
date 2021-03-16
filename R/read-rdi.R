@@ -59,7 +59,7 @@ rdi_index <- function(file, offset = 0, n_max = -1, only_valid = NA) {
 
   if (isTRUE(only_valid)) {
     result[checksum_valid, , drop = FALSE]
-  } else if (identical(only_valid, NA)) {
+  } else if (identical(only_valid, NA) && (sum(!checksum_valid) > 0)) {
     warning(
       sprintf(
         "Removing %d invalid ensembles based on checksum (of %d)",

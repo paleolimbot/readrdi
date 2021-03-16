@@ -108,6 +108,14 @@ test_that("read_rdi() works for multi-ensemble files", {
   )
 })
 
+test_that("read_rdi() can read only the velocity type", {
+  file <- system.file("extdata/19101018.rdi", package = "readrdi")
+  expect_identical(
+    read_rdi(file, types = rdi_detect_data_types(file)["velocity"])$velocity,
+    read_rdi(file)$velocity
+  )
+})
+
 
 test_that("read_rdi() works for filenames with non ASCII characters", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")

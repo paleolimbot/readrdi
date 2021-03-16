@@ -208,8 +208,13 @@ void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ense
     rdi_variable_leader_data_t variable;
     rdi_bottom_track_t bottom_track;
     for (uint8_t i = 0; i < header.n_data_types; i++) {
-        if (container_type_index[i] == -1) {
-            // fill in empty spaces!
+        // always read the fixed leader data since it's needed to alloc
+        // other data structures (otherwise avoid the seek)
+        if ((container_type_index[i] == -1) && (data_type[i] == RDI_TYPE_FIXED_LEADER)) {
+            rdi_seek_absolute(handle, data_offset[i]);
+            rdi_read_fixed_leader_data(&fixed, data->handle);
+            continue;
+        } else if (container_type_index[i] == -1) {
             continue;
         }
 
@@ -218,7 +223,7 @@ void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ense
         rdi_seek_absolute(handle, data_offset[i]);
         switch(data_type[i]) {
         case RDI_TYPE_FIXED_LEADER:
-            rdi_read_fixed_leader_data(&fixed, handle);
+            rdi_read_fixed_leader_data(&fixed, data->handle);
             rdi_set_fixed_leader_data(item, ensemble_id, &fixed);
             break;
         case RDI_TYPE_VARIABLE_LEADER:
