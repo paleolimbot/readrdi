@@ -304,6 +304,10 @@ SEXP readrdi_read_rdi_impl(void* data_void) {
 
     // read each ensemble pointed to by offset
     for (R_xlen_t i = 0; i < n_ensembles; i++) {
+        if (((i + 1) % 1000) == 0) {
+            R_CheckUserInterrupt();
+        }
+        
         rdi_seek_absolute(data->handle, REAL(data->offset)[i]);
         rdi_read_ensemble_sexp(data, container, i);
     }
