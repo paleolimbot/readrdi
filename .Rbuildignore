@@ -3,3 +3,5 @@
 ^LICENSE\.md$
 ^\.vscode$
 ^data-raw$
+^README\.Rmd$
+^\.github$
