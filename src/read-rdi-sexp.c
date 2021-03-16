@@ -18,20 +18,20 @@ SEXP rdi_create_header(R_xlen_t size) {
     return header_df;
 }
 
-void rdi_set_header(SEXP header_df, R_xlen_t i, rdi_header_t* header, 
+void rdi_set_header(SEXP header_df, R_xlen_t i, rdi_header_t* header,
                     uint16_t* data_offset, uint16_t* data_type) {
     INTEGER(VECTOR_ELT(header_df, 0))[i] = header->bytes_per_ensemble;
     INTEGER(VECTOR_ELT(header_df, 1))[i] = header->n_data_types;
     SEXP r_data_offset = PROTECT(Rf_allocVector(INTSXP, header->n_data_types));
-    for (uint16_t i = 0; i < header->n_data_types; i++) {
-        INTEGER(r_data_offset)[i] = data_offset[i];
+    for (uint16_t j = 0; j < header->n_data_types; j++) {
+        INTEGER(r_data_offset)[j] = data_offset[j];
     }
     SET_VECTOR_ELT(VECTOR_ELT(header_df, 2), i, r_data_offset);
     UNPROTECT(1);
 
     SEXP r_data_type = PROTECT(Rf_allocVector(INTSXP, header->n_data_types));
-    for (uint16_t i = 0; i < header->n_data_types; i++) {
-        INTEGER(r_data_type)[i] = data_type[i];
+    for (uint16_t j = 0; j < header->n_data_types; j++) {
+        INTEGER(r_data_type)[j] = data_type[j];
     }
     SET_VECTOR_ELT(VECTOR_ELT(header_df, 3), i, r_data_type);
     UNPROTECT(1);
