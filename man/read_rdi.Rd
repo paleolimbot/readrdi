@@ -12,7 +12,7 @@ read_rdi(
   types = rdi_detect_data_types(file, index)
 )
 
-rdi_index(file, offset = 0, n_max = -1)
+rdi_index(file, offset = 0, n_max = -1, only_valid = NA)
 
 rdi_detect_data_types(file, index = rdi_index(file, n_max = 100))
 }
@@ -30,6 +30,10 @@ for \code{\link[=rdi_index]{rdi_index()}} or a vector of ensemble start offsets 
 from \code{\link[=rdi_index]{rdi_index()}}) for \code{\link[=read_rdi]{read_rdi()}}.}
 
 \item{n_max}{Maximum number of ensembles to index}
+
+\item{only_valid}{Trim the index only to valid ensembles based on
+checksum. Use \code{TRUE} to silence the warning indicating how many
+ensembles were removed.}
 }
 \value{
 A \code{list()} with one component for each

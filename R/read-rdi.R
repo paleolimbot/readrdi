@@ -5,6 +5,9 @@
 #' @param types The variable IDs to extract from the file as a named
 #'   list. Most usefully the output of [rdi_detect_data_types()]
 #'   or a subset thereof.
+#' @param only_valid Trim the index only to valid ensembles based on
+#'   checksum. Use `TRUE` to silence the warning indicating how many
+#'   ensembles were removed.
 #' @param index An index created using [rdi_index()] or a subset thereof.
 #' @param offset Where to start looking for ensemble start indicators
 #'   for [rdi_index()] or a vector of ensemble start offsets (probably derived
@@ -34,7 +37,7 @@ read_rdi <- function(file, index = rdi_index(file),
 
 #' @rdname read_rdi
 #' @export
-rdi_index <- function(file, offset = 0, n_max = -1) {
+rdi_index <- function(file, offset = 0, n_max = -1, only_valid = NA) {
   file <- path.expand(file)
   index_transposed <- .Call(
     "readrdi_c_rdi_index",
@@ -43,7 +46,7 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
     as.double(n_max)[1]
   )
 
-  new_data_frame(
+  result <- new_data_frame(
     list(
       offset = vapply(index_transposed, "[", 1L, FUN.VALUE = double(1)),
       size = vapply(index_transposed, "[", 2L, FUN.VALUE = double(1)),
@@ -51,6 +54,24 @@ rdi_index <- function(file, offset = 0, n_max = -1) {
       checksum_calc = vapply(index_transposed, "[", 4L, FUN.VALUE = double(1))
     )
   )
+
+  checksum_valid <- result$checksum == result$checksum_calc
+
+  if (isTRUE(only_valid)) {
+    result[checksum_valid, , drop = FALSE]
+  } else if (identical(only_valid, NA)) {
+    warning(
+      sprintf(
+        "Removing %d invalid ensembles based on checksum (of %d)",
+        sum(!checksum_valid), length(checksum_valid)
+      ),
+      call. = FALSE,
+      immediate. = TRUE
+    )
+    result[checksum_valid, , drop = FALSE]
+  } else {
+    result
+  }
 }
 
 #' @rdname read_rdi
