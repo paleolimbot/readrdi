@@ -2,14 +2,15 @@
 % Please edit documentation in R/read-rdi.R
 \name{read_rdi}
 \alias{read_rdi}
-\alias{guess_rdi_types}
 \alias{rdi_index}
 \alias{rdi_detect_data_types}
 \title{Read RDI files}
 \usage{
-read_rdi(file, types = guess_rdi_types(file))
-
-guess_rdi_types(file)
+read_rdi(
+  file,
+  index = rdi_index(file),
+  types = rdi_detect_data_types(file, index)
+)
 
 rdi_index(file, offset = 0, n_max = -1)
 
@@ -18,8 +19,11 @@ rdi_detect_data_types(file, index = rdi_index(file, n_max = 100))
 \arguments{
 \item{file}{A filename from which to read}
 
-\item{types}{The variable types to extract from the file.
-Defaults to all variable types found in the first file.}
+\item{index}{An index created using \code{\link[=rdi_index]{rdi_index()}} or a subset thereof.}
+
+\item{types}{The variable IDs to extract from the file as a named
+list. Most usefully the output of \code{\link[=rdi_detect_data_types]{rdi_detect_data_types()}}
+or a subset thereof.}
 
 \item{offset}{Where to start looking for ensemble start indicators
 for \code{\link[=rdi_index]{rdi_index()}} or a vector of ensemble start offsets (probably derived
@@ -37,4 +41,8 @@ Read RDI files
 rdi_file <- system.file("extdata/19101018.rdi", package = "readrdi")
 rdi <- read_rdi(rdi_file)
 
+}
+\author{
+This was written using the explicit and implicit documentation
+provided by \code{oce::read.adp.rdi()} written by Daniel Kelley.
 }

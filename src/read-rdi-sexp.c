@@ -8,23 +8,32 @@
 #include "read-rdi-common.h"
 
 SEXP rdi_create_header(R_xlen_t size) {
-    const char* header_names[] = {"bytes_per_ensemble", "n_data_types", "data_offset", ""};
+    const char* header_names[] = {"bytes_per_ensemble", "n_data_types", "data_offset", "data_type", ""};
     SEXP header_df = PROTECT(Rf_mkNamed(VECSXP, header_names));
     SET_VECTOR_ELT(header_df, 0, Rf_allocVector(INTSXP, size));
     SET_VECTOR_ELT(header_df, 1, Rf_allocVector(INTSXP, size));
     SET_VECTOR_ELT(header_df, 2, Rf_allocVector(VECSXP, size));
+    SET_VECTOR_ELT(header_df, 3, Rf_allocVector(VECSXP, size));
     UNPROTECT(1);
     return header_df;
 }
 
-void rdi_set_header(SEXP header_df, R_xlen_t i, rdi_header_t* header, uint16_t* data_offset) {
+void rdi_set_header(SEXP header_df, R_xlen_t i, rdi_header_t* header, 
+                    uint16_t* data_offset, uint16_t* data_type) {
     INTEGER(VECTOR_ELT(header_df, 0))[i] = header->bytes_per_ensemble;
     INTEGER(VECTOR_ELT(header_df, 1))[i] = header->n_data_types;
     SEXP r_data_offset = PROTECT(Rf_allocVector(INTSXP, header->n_data_types));
     for (uint16_t i = 0; i < header->n_data_types; i++) {
         INTEGER(r_data_offset)[i] = data_offset[i];
     }
-    SET_VECTOR_ELT(VECTOR_ELT(header_df, 2), 0, r_data_offset);
+    SET_VECTOR_ELT(VECTOR_ELT(header_df, 2), i, r_data_offset);
+    UNPROTECT(1);
+
+    SEXP r_data_type = PROTECT(Rf_allocVector(INTSXP, header->n_data_types));
+    for (uint16_t i = 0; i < header->n_data_types; i++) {
+        INTEGER(r_data_type)[i] = data_type[i];
+    }
+    SET_VECTOR_ELT(VECTOR_ELT(header_df, 3), i, r_data_type);
     UNPROTECT(1);
 }
 

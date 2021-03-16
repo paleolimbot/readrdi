@@ -163,7 +163,6 @@ int rdi_container_type_index(read_rdi_data_t* data, uint16_t data_type) {
 
 void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ensemble_id) {
     FILE* handle = data->handle;
-    int n_container_data_types = Rf_length(container);
 
     rdi_header_t header;
     rdi_read_header(&header, handle);
@@ -177,8 +176,8 @@ void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ense
         );
     }
 
-    uint16_t data_offset[n_container_data_types];
-    rdi_read_uint16_n(data_offset, n_container_data_types, handle);
+    uint16_t data_offset[header.n_data_types];
+    rdi_read_uint16_n(data_offset, header.n_data_types, handle);
 
     // get machine- and human-readable ids for the data types in this file
     // leave room for the header as the first item
@@ -194,7 +193,7 @@ void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ense
     if (container_header_index != -1) {
         rdi_set_header(
             VECTOR_ELT(container, container_header_index), 
-            ensemble_id, &header, data_offset
+            ensemble_id, &header, data_offset, data_type
         );
     }
 
@@ -210,6 +209,7 @@ void rdi_read_ensemble_sexp(read_rdi_data_t* data, SEXP container, R_xlen_t ense
     rdi_bottom_track_t bottom_track;
     for (uint8_t i = 0; i < header.n_data_types; i++) {
         if (container_type_index[i] == -1) {
+            // fill in empty spaces!
             continue;
         }
 

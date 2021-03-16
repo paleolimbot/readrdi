@@ -60,7 +60,19 @@ test_that("rdi_index() works on multiple ensembles in one file", {
 
 test_that("rdi_detect_data_types() works", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
-  rdi_detect_data_types(file)
+  expect_equal(
+    rdi_detect_data_types(file),
+    c(
+      "header" = 0x7f7f,
+      "fixed_leader" = 0x0000,
+      "variable_leader" = 0x0080,
+      "velocity" = 0x0100,
+      "correlation" = 0x0200,
+      "echo_intensity" = 0x0300,
+      "pct_good" = 0x0400,
+      "bottom_track" = 0x0600
+    )
+  )
 })
 
 test_that("read_rdi() works", {
@@ -93,7 +105,7 @@ test_that("read_rdi_internal() aligns with results from oce::read.adp.rdi()", {
   # debug(oce:::decodeHeaderRDI)
   # oce_rdi <- oce::read.adp.rdi(file)
 
-  rdi <- read_rdi_internal(file, offset = 0)
+  rdi <- read_rdi(file)
 
   # pick values towards the end of the structs
   # that are likely to be misaligned if any error occurred
@@ -191,7 +203,7 @@ test_that("read_rdi_internal() aligns with results from oce::read.adp.rdi()", {
 test_that("read_rdi_internal() errors when passed an invalid offset", {
   file <- system.file("extdata/19101018.rdi", package = "readrdi")
   expect_error(
-    read_rdi_internal(file, offset = 1),
+    read_rdi_internal(file, index = list(offset = 1), data_types = integer()),
     "Expected 0x7f7f"
   )
 })
