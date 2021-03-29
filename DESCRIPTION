@@ -1,6 +1,6 @@
 Package: readrdi
 Title: Read 'RDI' Acoustic Doppler Profile Files
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person(given = "Dewey",
            family = "Dunnington",
