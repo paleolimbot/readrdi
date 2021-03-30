@@ -2,9 +2,12 @@
 % Please edit documentation in R/rdi-unpack.R
 \name{rdi_unpack_system_config}
 \alias{rdi_unpack_system_config}
+\alias{rdi_unpack_coord_transform}
 \title{Unpack an RDI System Configuration}
 \usage{
 rdi_unpack_system_config(system_config)
+
+rdi_unpack_coord_transform(system_config)
 }
 \arguments{
 \item{system_config}{The \code{system_config} column from the \code{fixed_leader}
@@ -18,5 +21,6 @@ Unpack an RDI System Configuration
 }
 \examples{
 rdi_unpack_system_config(51777)
+rdi_unpack_coord_transform(17)
 
 }

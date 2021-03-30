@@ -14,3 +14,11 @@ test_that("unpack configuration is vectorized", {
     5L
   )
 })
+
+test_that("unpack coord transform works", {
+  coord <- rdi_unpack_coord_transform(0x17)
+  expect_identical(coord$coord_system, "sfm")
+  expect_identical(coord$tilt_used, TRUE)
+  expect_identical(coord$bin_mapping_used, TRUE)
+  expect_identical(coord$three_beam_used, TRUE)
+})

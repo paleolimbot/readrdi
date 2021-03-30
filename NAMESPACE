@@ -2,6 +2,7 @@
 
 export(rdi_detect_data_types)
 export(rdi_index)
+export(rdi_unpack_coord_transform)
 export(rdi_unpack_system_config)
 export(read_rdi)
 useDynLib(readrdi, .registration = TRUE)
