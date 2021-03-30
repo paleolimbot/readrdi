@@ -8,9 +8,9 @@
 #' @export
 #'
 #' @examples
-#' rdi_system_config_unpack(51777)
+#' rdi_unpack_system_config(51777)
 #'
-rdi_system_config_unpack <- function(system_config) {
+rdi_unpack_system_config <- function(system_config) {
   configs <- list(
     frequency = config_freq,
     angle = config_angle,
