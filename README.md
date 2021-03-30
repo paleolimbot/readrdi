@@ -116,19 +116,17 @@ str(rdi)
 #>  $ pct_good       :'data.frame': 1 obs. of  1 variable:
 #>   ..$ pct_good:List of 1
 #>   .. ..$ : raw [1:4, 1:25] 07 00 08 53 ...
-#>  $ bottom_track   :'data.frame': 1 obs. of  6 variables:
-#>   ..$ range_lsb            :List of 1
-#>   .. ..$ : int [1:4] 6179 6082 6106 6130
-#>   ..$ bottom_track_velocity:List of 1
+#>  $ bottom_track   :'data.frame': 1 obs. of  5 variables:
+#>   ..$ bottom_range      :List of 1
+#>   .. ..$ : num [1:4] 61.8 60.8 61.1 61.3
+#>   ..$ bottom_velocity   :List of 1
 #>   .. ..$ : num [1:4] -0.357 -0.279 0.006 -0.001
-#>   ..$ bc                   :List of 1
+#>   ..$ bottom_correlation:List of 1
 #>   .. ..$ : int [1:4] 254 254 255 254
-#>   ..$ ba                   :List of 1
+#>   ..$ bottom_amplitude  :List of 1
 #>   .. ..$ : int [1:4] 78 79 82 76
-#>   ..$ bg                   :List of 1
+#>   ..$ bottom_pct_good   :List of 1
 #>   .. ..$ : int [1:4] 0 0 0 100
-#>   ..$ range_msb            :List of 1
-#>   .. ..$ : int [1:4] 0 0 0 0
 ```
 
 For more detailed inspection of potentially corrupted files, you can use
