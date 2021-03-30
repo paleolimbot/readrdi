@@ -3,6 +3,8 @@
 #'
 #' @param system_config The `system_config` column from the `fixed_leader`
 #'   item read from [read_rdi()].
+#' @param coord_transform The `coord_transform` column from the `fixed_leader`
+#'   item read from [read_rdi()].
 #'
 #' @return A data frame with one column per unpacked value.
 #' @export
@@ -24,7 +26,7 @@ rdi_unpack_system_config <- function(system_config) {
 
 #' @rdname rdi_unpack_system_config
 #' @export
-rdi_unpack_coord_transform <- function(system_config) {
+rdi_unpack_coord_transform <- function(coord_transform) {
   configs <- list(
     coord_system = coord_system,
     tilt_used = coord_tilt_used,
@@ -32,7 +34,7 @@ rdi_unpack_coord_transform <- function(system_config) {
     bin_mapping_used = coord_bin_mapping_used
   )
 
-  new_data_frame(lapply(configs, unpack_one, as.integer(system_config)))
+  new_data_frame(lapply(configs, unpack_one, as.integer(coord_transform)))
 }
 
 unpack_one <- function(config, x) {

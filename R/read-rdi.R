@@ -231,6 +231,18 @@ read_rdi_fix_variable_leader <- function(item) {
 }
 
 read_rdi_fix_bottom_track <- function(item) {
-  item$bottom_track_velocity <- lapply(item$bottom_track_velocity, "/", 1000.0)
+  item$bottom_velocity <- lapply(item$bottom_velocity, "/", 1000.0)
+
+  # Combine most-significant byte and least-significant byte(s) for range
+  # and scale by 100. Scale most significant byte by 2^16 because the least
+  # significant byte is an unsigned 16-bit integer
+  item$bottom_range <- Map(
+    function(x, y) (x * 2^16 + y) / 100.0,
+    item$bottom_range_msb,
+    item$bottom_range
+  )
+
+  item$bottom_range_msb <- NULL
+
   item
 }

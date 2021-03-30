@@ -7,10 +7,13 @@
 \usage{
 rdi_unpack_system_config(system_config)
 
-rdi_unpack_coord_transform(system_config)
+rdi_unpack_coord_transform(coord_transform)
 }
 \arguments{
 \item{system_config}{The \code{system_config} column from the \code{fixed_leader}
+item read from \code{\link[=read_rdi]{read_rdi()}}.}
+
+\item{coord_transform}{The \code{coord_transform} column from the \code{fixed_leader}
 item read from \code{\link[=read_rdi]{read_rdi()}}.}
 }
 \value{
@@ -21,6 +24,6 @@ Unpack an RDI System Configuration
 }
 \examples{
 rdi_unpack_system_config(51777)
-rdi_unpack_coord_transform(17)
+rdi_unpack_coord_transform(23)
 
 }
